@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUG QUEST 昆蟲探險隊 - 完整遊戲與數位入口平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        display: ['"Fredoka"', '"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #ecfdf5;
+            background-image: 
+                radial-gradient(at 0% 0%, #bae6fd 0px, transparent 50%),
+                radial-gradient(at 100% 0%, #fef08a 0px, transparent 50%),
+                radial-gradient(at 100% 100%, #bbf7d0 0px, transparent 50%),
+                radial-gradient(at 0% 100%, #fde68a 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .wood-panel {
+            background: linear-gradient(180deg, #b45309 0%, #78350f 100%);
+            border: 3px solid #451a03;
+            box-shadow: 0 4px 0 #451a03;
+        }
+        .text-outline-wood {
+            text-shadow: 
+                -2px -2px 0 #5c3a21,  
+                 2px -2px 0 #5c3a21,
+                -2px  2px 0 #5c3a21,
+                 2px  2px 0 #5c3a21,
+                 0px  3px 0 #5c3a21;
+        }
+        .nav-active {
+            background-color: #facc15 !important;
+            color: #451a03 !important;
+            box-shadow: 0 3px 0 #b45309;
+            transform: translateY(-1px);
+        }
+        @keyframes cardPop {
+            0% { transform: scale(0.6) rotate(-12deg); opacity: 0; }
+            70% { transform: scale(1.06) rotate(2deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .card-pop {
+            animation: cardPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes shakeHard {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px) rotate(-2deg); }
+            40% { transform: translateX(10px) rotate(2deg); }
+            60% { transform: translateX(-8px); }
+            80% { transform: translateX(8px); }
+        }
+        .shake-event {
+            animation: shakeHard 0.5s ease-in-out;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+    <!-- ==================== 頂部整合導覽列（遊戲 ＋ 四大數位入口） ==================== -->
+    <header class="bg-emerald-900/95 backdrop-blur-md text-white shadow-xl sticky top-0 z-40 border-b-2 border-emerald-600">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex flex-col md:flex-row items-center justify-between gap-2.5">
+            <!-- 品牌 Logo -->
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl bg-amber-400 w-10 h-10 rounded-2xl flex items-center justify-center shadow transform -rotate-3">🪲</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-700 text-emerald-200 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500">BUGTOPIA</span>
+                            <h1 class="font-display font-black text-lg sm:text-xl tracking-wide text-amber-300">BUG QUEST</h1>
+                            <span class="font-black text-sm sm:text-base">昆蟲探險隊</span>
+                        </div>
+                        <p class="text-[11px] text-emerald-200 hidden sm:block">翻開每一張牌，發現昆蟲大世界！｜完整互動遊戲＆數位入口</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 五大功能切換分頁 -->
+            <nav class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar pb-0.5 md:pb-0">
+                <button onclick="switchMainSection('play')" id="nav-play" class="main-nav-btn nav-active bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-black px-3 py-2 rounded-xl transition shrink-0 flex items-center gap-1">
+            <!-- 四大功能切換分頁 -->
+            <nav class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar pb-0.5 md:pb-0">
+                <button onclick="switchMainSection('play')" id="nav-play" class="main-nav-btn nav-active bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-black px-3 py-2 rounded-xl transition shrink-0 flex items-center gap-1">
+                    <span>🎮</span> <span>線上對戰遊戲</span>
+                </button>
+                <button onclick="switchMainSection('rules')" id="nav-rules" class="main-nav-btn bg-emerald-800 hover:bg-emerald-700 text-emerald-100 text-xs font-bold px-3 py-2 rounded-xl transition shrink-0 flex items-center gap-1">
+                    <span>📖</span> <span>遊戲說明</span>
+                </button>
+                <button onclick="switchMainSection('dex')" id="nav-dex" class="main-nav-btn bg-emerald-800 hover:bg-emerald-700 text-emerald-100 text-xs font-bold px-3 py-2 rounded-xl transition shrink-0 flex items-center gap-1">
+                    <span>🦋</span> <span>昆蟲圖鑑</span>
+                </button>
+                <button onclick="switchMainSection('tracker')" id="nav-tracker" class="main-nav-btn bg-emerald-800 hover:bg-emerald-700 text-emerald-100 text-xs font-bold px-3 py-2 rounded-xl transition shrink-0 flex items-center gap-1">
+                    <span>🏆</span> <span>實體計分板</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- 分區 A：完整互動撲克牌桌遊 (線上對戰遊戲)                                     -->
+    <!-- ========================================================================= -->
+    <div id="section-play" class="main-section flex-1 flex flex-col">
+        
+        <!-- 畫面 A1：遊戲開始大廳 -->
+        <div id="screen-title" class="flex-1 flex items-center justify-center p-4">
+            <div class="max-w-xl w-full bg-white/95 backdrop-blur-md rounded-[32px] p-6 sm:p-8 shadow-2xl border-4 border-white text-center space-y-5">
+                <div class="inline-block bg-sky-100 text-sky-800 font-black text-xs px-3.5 py-1 rounded-full">
+                    🌿 BUGTOPIA 互動育樂應用設計 － 撲克牌育樂桌遊
+                </div>
+                
+                <div>
+                    <h2 class="font-display font-black text-5xl sm:text-6xl text-amber-300 text-outline-wood tracking-tight">
+                        BUG QUEST
+                    </h2>
+                    <div class="mt-2 inline-block wood-panel text-white font-black text-2xl px-6 py-1.5 rounded-2xl tracking-widest">
+                        昆蟲探險隊
+                    </div>
+                    <p class="mt-3 text-sm font-bold text-emerald-700">「翻開每一張牌，發現昆蟲大世界！」</p>
+                </div>
+
+                <!-- 遊戲模式與目標設定 -->
+                <div class="bg-emerald-50/90 rounded-2xl p-4 border border-emerald-200 text-left space-y-4">
+                    <div>
+                        <label class="block text-xs font-black text-emerald-900 mb-2">1. 選擇遊玩模式：</label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <button onclick="selectMode('ai')" id="mode-ai" class="mode-btn bg-emerald-600 text-white font-bold py-3 px-3 rounded-xl shadow text-sm flex flex-col items-center">
+                                <span>🤖 單人挑戰 AI 隊長</span>
+                                <span class="text-[11px] font-normal opacity-90 mt-0.5">與電腦探險家比拚分數</span>
+                            </button>
+                            <button onclick="selectMode('pvp')" id="mode-pvp" class="mode-btn bg-white text-slate-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-3 px-3 rounded-xl text-sm flex flex-col items-center">
+                                <span>👥 雙人同機對戰</span>
+                                <span class="text-[11px] font-normal opacity-80 mt-0.5">兩位玩家輪流抽牌探索</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-emerald-900 mb-2">2. 勝利目標分數：</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="selectTargetScore(10)" id="target-10" class="target-btn bg-white border border-emerald-200 text-slate-700 font-bold py-2 rounded-xl text-xs">10 分（快速局）</button>
+                            <button onclick="selectTargetScore(15)" id="target-15" class="target-btn bg-amber-400 text-amber-950 font-black py-2 rounded-xl text-xs shadow">15 分（標準局）</button>
+                            <button onclick="selectTargetScore(20)" id="target-20" class="target-btn bg-white border border-emerald-200 text-slate-700 font-bold py-2 rounded-xl text-xs">20 分（深度局）</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <button onclick="switchMainSection('rules')" class="sm:w-1/3 bg-sky-100 hover:bg-sky-200 text-sky-900 font-black text-sm py-3.5 rounded-2xl transition">
+                        📖 先看遊戲說明
+                    </button>
+                    <button onclick="startGame()" class="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-lg py-3.5 rounded-2xl shadow-xl transform transition active:scale-95 flex items-center justify-center gap-2">
+                        <span>🚀</span> <span>開始昆蟲大探險！</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 畫面 A2：主遊戲桌面 -->
+        <main id="screen-game" class="hidden flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-4 flex-col gap-4 select-none">
+            
+            <!-- 頂部局內快捷列 -->
+            <div class="flex items-center justify-between bg-white/80 backdrop-blur-xs px-4 py-2 rounded-2xl border border-emerald-200 text-xs">
+                <div class="font-bold text-emerald-900 flex items-center gap-2">
+                    <span>🎯 勝利條件：率先達到 <strong class="text-amber-600 text-sm target-display">15</strong> 分獲勝！</span>
+                </div>
+                <button onclick="returnToTitle()" class="bg-amber-100 hover:bg-amber-200 text-amber-950 font-black px-3 py-1 rounded-xl transition">
+                    🔄 結束並回遊戲大廳
+                </button>
+            </div>
+
+            <!-- 1. 雙方玩家計分板與安全區資源列 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- 玩家 1 面板 -->
+                <div id="panel-p0" class="bg-white rounded-3xl p-4 shadow-md border-4 border-emerald-500 transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🧢</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span id="name-p0" class="font-black text-base text-slate-800">玩家 1</span>
+                                    <span id="turn-badge-p0" class="bg-emerald-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full animate-pulse">目前回合</span>
+                                </div>
+                                <div id="bugs-p0" class="flex flex-wrap gap-1 mt-1 min-h-[20px] text-xs text-slate-400">尚未發現昆蟲</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[11px] font-bold text-slate-400">目標 <span class="target-display">15</span> 分</div>
+                            <div class="text-3xl font-display font-black text-emerald-600"><span id="score-p0">0</span> <span class="text-xs font-sans text-slate-500">分</span></div>
+                        </div>
+                    </div>
+                    <!-- 玩家 1 安全區 -->
+                    <div class="bg-emerald-50 rounded-2xl p-2.5 border border-emerald-200 flex items-center justify-between">
+                        <span class="text-xs font-black text-emerald-900 flex items-center gap-1" title="安全區能量不會受到 J/Q/K 事件影響">🛡️ 安全區：</span>
+                        <div id="safe-p0" class="flex gap-2 sm:gap-3 text-sm font-black"></div>
+                    </div>
+                </div>
+
+                <!-- 玩家 2 / AI 面板 -->
+                <div id="panel-p1" class="bg-white/90 rounded-3xl p-4 shadow-md border-4 border-transparent transition-all">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span id="avatar-p1" class="text-2xl">🤖</span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span id="name-p1" class="font-black text-base text-slate-800">AI 探險隊長</span>
+                                    <span id="turn-badge-p1" class="hidden bg-amber-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full animate-pulse">思考中...</span>
+                                </div>
+                                <div id="bugs-p1" class="flex flex-wrap gap-1 mt-1 min-h-[20px] text-xs text-slate-400">尚未發現昆蟲</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[11px] font-bold text-slate-400">目標 <span class="target-display">15</span> 分</div>
+                            <div class="text-3xl font-display font-black text-amber-600"><span id="score-p1">0</span> <span class="text-xs font-sans text-slate-500">分</span></div>
+                        </div>
+                    </div>
+                    <!-- 玩家 2 安全區 -->
+                    <div class="bg-amber-50 rounded-2xl p-2.5 border border-amber-200 flex items-center justify-between">
+                        <span class="text-xs font-black text-amber-900 flex items-center gap-1">🛡️ 安全區：</span>
+                        <div id="safe-p1" class="flex gap-2 sm:gap-3 text-sm font-black"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 中央探險桌面（牌庫 ＋ 翻牌區 ＋ 暫存區 ＋ 行動按鈕） -->
+            <div id="table-area" class="bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 shadow-lg border-2 border-emerald-200 grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                
+                <!-- 左側：牌堆與最新翻開的牌 -->
+                <div class="lg:col-span-5 flex items-center justify-center gap-4 sm:gap-6 py-2">
+                    <button id="deck-btn" onclick="handleDrawCard()" class="relative group focus:outline-none">
+                        <div class="w-28 h-40 sm:w-32 sm:h-44 rounded-2xl bg-gradient-to-b from-sky-400 via-sky-300 to-emerald-400 border-4 border-white shadow-xl flex flex-col items-center justify-center p-2 transform transition group-hover:-translate-y-1.5 group-active:scale-95">
+                            <div class="border-2 border-dashed border-white/80 rounded-xl w-full h-full flex flex-col items-center justify-center">
+                                <span class="font-display font-black text-xl text-amber-200 text-outline-wood leading-none">BUG<br>QUEST</span>
+                                <span class="mt-2 bg-amber-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">剩餘 <span id="deck-count">52</span> 張</span>
+                            </div>
+                        </div>
+                        <span class="block mt-1.5 text-xs font-black text-emerald-800">👆 點擊抽牌</span>
+                    </button>
+
+                    <!-- 最新翻開的撲克牌展示位 -->
+                    <div class="flex flex-col items-center">
+                        <div id="drawn-card-slot" class="w-28 h-40 sm:w-32 sm:h-44 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center p-2 text-center">
+                            <span class="text-3xl opacity-30">🃏</span>
+                            <span class="text-[11px] font-bold text-slate-400 mt-1">翻開的牌<br>顯示於此</span>
+                        </div>
+                        <span class="block mt-1.5 text-xs font-bold text-slate-500">最新翻開</span>
+                    </div>
+                </div>
+
+                <!-- 右側：本回合暫存區與操作按鈕 -->
+                <div class="lg:col-span-7 flex flex-col justify-between bg-amber-50/80 rounded-2xl p-4 border-2 border-amber-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-1">
+                        <span class="font-black text-sm text-amber-950 flex items-center gap-1.5">
+                            <span>⚠️</span> <span>本回合「暫存區」（遇 J/Q/K 全數失去！）</span>
+                        </span>
+                        <span id="turn-status-text" class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">請抽牌開始本回合</span>
+                    </div>
+
+                    <!-- 暫存區能量統計 -->
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="bg-white rounded-xl p-2 border border-rose-200 text-center">
+                            <div class="text-xs font-bold text-rose-600">♥ 花蜜</div>
+                            <div id="temp-♥" class="text-2xl font-display font-black text-rose-600">0</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-2 border border-slate-300 text-center">
+                            <div class="text-xs font-bold text-slate-800">♠ 森林</div>
+                            <div id="temp-♠" class="text-2xl font-display font-black text-slate-800">0</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-2 border border-amber-200 text-center">
+                            <div class="text-xs font-bold text-amber-500">♦ 陽光</div>
+                            <div id="temp-♦" class="text-2xl font-display font-black text-amber-500">0</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-2 border border-emerald-200 text-center">
+                            <div class="text-xs font-bold text-emerald-700">♣ 植物</div>
+                            <div id="temp-♣" class="text-2xl font-display font-black text-emerald-700">0</div>
+                        </div>
+                    </div>
+
+                    <!-- 本回合已抽出的牌縮圖列 -->
+                    <div id="temp-cards-list" class="flex flex-wrap gap-1.5 min-h-[28px] items-center text-xs text-slate-400">
+                        尚未抽取能量牌...
+                    </div>
+
+                    <!-- 核心操作按鈕 -->
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <button id="btn-draw" onclick="handleDrawCard()" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-black py-3 px-4 rounded-xl shadow transition active:scale-95 flex items-center justify-center gap-1.5 text-sm sm:text-base">
+                            <span>🃏</span> <span>繼續抽牌</span>
+                        </button>
+                        <button id="btn-bank" onclick="handleBankEnergy()" disabled class="bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-amber-950 font-black py-3 px-4 rounded-xl shadow transition active:scale-95 flex items-center justify-center gap-1.5 text-sm sm:text-base">
+                            <span>🛡️</span> <span>停止並存入安全區</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 昆蟲探索任務區 -->
+            <div class="bg-white/95 rounded-3xl p-4 sm:p-5 shadow-lg border-2 border-emerald-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+                    <h2 class="font-black text-base sm:text-lg text-emerald-900 flex items-center gap-2">
+                        <span>🦋</span> <span>昆蟲探索任務（消耗「安全區」能量完成探索！）</span>
+                    </h2>
+                    <span class="text-xs font-bold text-slate-500">亮起綠框代表你目前安全區能量足夠探索！</span>
+                </div>
+
+                <div id="bugs-market" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <!-- 由 JS 動態生成 6 種昆蟲卡片 -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 分區 B：遊戲說明書 (對應企劃 P.2 ~ P.5 完整內容)                              -->
+    <!-- ========================================================================= -->
+    <section id="section-rules" class="main-section hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
+        <!-- 遊戲目標與學習內容 -->
+        <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100 space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <h2 class="text-xl sm:text-2xl font-black text-emerald-900 flex items-center gap-2">
+                    <span>🎯</span> 遊戲目標與學習內容
+                </h2>
+                <button onclick="switchMainSection('play')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-4 py-2 rounded-xl shadow transition">
+                    🎮 返回遊戲桌面
+                </button>
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 leading-relaxed">
+                玩家將扮演<strong>昆蟲探險隊</strong>的一員，透過撲克牌收集不同種類的自然能量，在「繼續冒險抽牌」與「存入安全區」之間做出策略判斷，完成昆蟲探索任務並認識昆蟲的生活習性與生態環境！
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div class="bg-sky-50 border border-sky-200 p-3.5 rounded-2xl">
+                    <div class="font-black text-sky-900 text-sm mb-1">1. 認識昆蟲</div>
+                    <p class="text-slate-600 leading-relaxed">了解不同昆蟲的外型、身體構造特徵及種類。</p>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">
+                    <div class="font-black text-emerald-900 text-sm mb-1">2. 昆蟲生態知識</div>
+                    <p class="text-slate-600 leading-relaxed">認識昆蟲的食物、棲息環境及生活習性。</p>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl">
+                    <div class="font-black text-amber-900 text-sm mb-1">3. 資源管理</div>
+                    <p class="text-slate-600 leading-relaxed">學習分配有限能量資源，完成不同昆蟲探索任務。</p>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl">
+                    <div class="font-black text-rose-900 text-sm mb-1">4. 策略判斷</div>
+                    <p class="text-slate-600 leading-relaxed">評估風險，決定繼續抽牌或保留目前收集的能量。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 撲克牌功能設定 -->
+        <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100 space-y-4">
+            <h2 class="text-xl font-black text-emerald-900 flex items-center gap-2">
+                <span>🃏</span> 遊戲配件與撲克牌功能設定（52 張，不含鬼牌）
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center">
+                    <div class="text-3xl mb-1 text-rose-600">♥</div>
+                    <div class="font-black text-rose-900">紅心 (A～10)</div>
+                    <div class="text-xs font-bold bg-rose-200/70 text-rose-800 px-2.5 py-0.5 rounded-full inline-block mt-1">🌸 花蜜能量</div>
+                </div>
+                <div class="bg-slate-100 border border-slate-300 rounded-2xl p-4 text-center">
+                    <div class="text-3xl mb-1 text-slate-800">♠</div>
+                    <div class="font-black text-slate-900">黑桃 (A～10)</div>
+                    <div class="text-xs font-bold bg-slate-300/70 text-slate-800 px-2.5 py-0.5 rounded-full inline-block mt-1">🌲 森林能量</div>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                    <div class="text-3xl mb-1 text-amber-500">♦</div>
+                    <div class="font-black text-amber-900">方塊 (A～10)</div>
+                    <div class="text-xs font-bold bg-amber-200/70 text-amber-800 px-2.5 py-0.5 rounded-full inline-block mt-1">☀️ 陽光能量</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+                    <div class="text-3xl mb-1 text-emerald-700">♣</div>
+                    <div class="font-black text-emerald-900">梅花 (A～10)</div>
+                    <div class="text-xs font-bold bg-emerald-200/70 text-emerald-800 px-2.5 py-0.5 rounded-full inline-block mt-1">🌿 植物能量</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-3.5 flex items-center gap-3">
+                    <div class="w-10 h-12 bg-white border-2 border-sky-400 rounded-xl flex items-center justify-center font-black text-xl text-sky-700 shrink-0">J</div>
+                    <div>
+                        <div class="font-black text-sky-900">💨 強風事件</div>
+                        <div class="text-xs text-slate-600 mt-0.5">暫存區能量全部吹散失去，本回合強制結束！</div>
+                    </div>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5 flex items-center gap-3">
+                    <div class="w-10 h-12 bg-white border-2 border-indigo-400 rounded-xl flex items-center justify-center font-black text-xl text-indigo-700 shrink-0">Q</div>
+                    <div>
+                        <div class="font-black text-indigo-900">⛈️ 暴雨事件</div>
+                        <div class="text-xs text-slate-600 mt-0.5">暫存區能量全數流失，本回合強制結束！</div>
+                    </div>
+                </div>
+                <div class="bg-orange-50 border border-orange-200 rounded-2xl p-3.5 flex items-center gap-3">
+                    <div class="w-10 h-12 bg-white border-2 border-orange-400 rounded-xl flex items-center justify-center font-black text-xl text-orange-700 shrink-0">K</div>
+                    <div>
+                        <div class="font-black text-orange-900">🍂 棲地變化</div>
+                        <div class="text-xs text-slate-600 mt-0.5">暫存區能量無法保留，本回合強制結束！</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲六步驟流程 -->
+        <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-100">
+            <h2 class="text-xl font-black text-emerald-900 flex items-center gap-2 mb-4">
+                <span>🧭</span> 遊戲玩法六步驟 (STEP 1 ～ STEP 6)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex gap-3.5 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                    <span class="bg-emerald-600 text-white font-black text-xs px-2.5 py-1 rounded-lg h-fit shrink-0">STEP 1</span>
+                    <div><h3 class="font-black text-emerald-950">遊戲準備</h3><p class="text-sm text-slate-600 mt-1">洗勻 52 張撲克牌，每位玩家確認昆蟲探索任務表，並決定遊戲順序。</p></div>
+                </div>
+                <div class="flex gap-3.5 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                    <span class="bg-emerald-600 text-white font-black text-xs px-2.5 py-1 rounded-lg h-fit shrink-0">STEP 2</span>
+                    <div><h3 class="font-black text-emerald-950">抽取撲克牌</h3><p class="text-sm text-slate-600 mt-1">玩家輪流翻開一張牌，A～10 放入「暫存區」，累積不同花色的自然能量。</p></div>
+                </div>
+                <div class="flex gap-3.5 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                    <span class="bg-emerald-600 text-white font-black text-xs px-2.5 py-1 rounded-lg h-fit shrink-0">STEP 3</span>
+                    <div><h3 class="font-black text-emerald-950">選擇繼續或停止</h3><p class="text-sm text-slate-600 mt-1">可以選擇繼續抽牌，或停止抽牌並將暫存區的能量移至「安全區」妥善保存。</p></div>
+                </div>
+                <div class="flex gap-3.5 p-4 rounded-2xl bg-rose-50/70 border border-rose-100">
+                    <span class="bg-rose-600 text-white font-black text-xs px-2.5 py-1 rounded-lg h-fit shrink-0">STEP 4</span>
+                    <div><h3 class="font-black text-rose-950">遭遇自然事件</h3><p class="text-sm text-slate-600 mt-1">若抽到 J、Q、K，暫存區的能量全部失去，本回合結束；安全區的能量不受影響。</p></div>
+                </div>
+                <div class="flex gap-3.5 p-4 rounded-2xl bg-amber-50/70 border border-amber-100">
+                    <span class="bg-amber-600 text-white font-black text-xs px-2.5 py-1 rounded-lg h-fit shrink-0">STEP 5</span>
+                    <div><h3 class="font-black text-amber-950">完成昆蟲探索</h3><p class="text-sm text-slate-600 mt-1">使用安全區收集的能量，達成昆蟲所需條件即可完成探索。</p></div>
+                </div>
+                <div class="flex gap-3.5 p-4 rounded-2xl bg-amber-50/70 border border-amber-100">
+                    <span class="bg-amber-600 text-white font-black text-xs px-2.5 py-1 rounded-lg h-fit shrink-0">STEP 6</span>
+                    <div><h3 class="font-black text-amber-950">計算分數</h3><p class="text-sm text-slate-600 mt-1">完成昆蟲探索即可獲得對應的昆蟲基本分數（3分或5分），累積達標即獲勝！</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 分區 C：昆蟲生態圖鑑 (6 種昆蟲詳細構造、習性與探索條件)                      -->
+    <!-- ========================================================================= -->
+    <section id="section-dex" class="main-section hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-md border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-black text-emerald-900 flex items-center gap-2">
+                    <span>🦋</span> 昆蟲探索任務與生態圖鑑
+                </h2>
+                <p class="text-sm text-slate-600 mt-1">認識六種探險目標昆蟲的外型特徵、棲息食物與所需能量組合！</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="filterDex('all', this)" class="dex-filter-btn bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">全部 (6)</button>
+                <button onclick="filterDex(3, this)" class="dex-filter-btn bg-emerald-100 text-emerald-800 hover:bg-emerald-200 text-xs font-bold px-3 py-1.5 rounded-full">基礎 3分</button>
+                <button onclick="filterDex(5, this)" class="dex-filter-btn bg-emerald-100 text-emerald-800 hover:bg-emerald-200 text-xs font-bold px-3 py-1.5 rounded-full">進階 5分</button>
+            </div>
+        </div>
+
+        <div id="dex-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- 由 JS 動態生成詳細圖鑑卡片 -->
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 分區 E：實體桌遊輔助計分板 (當使用實體撲克牌遊玩時的數位紀錄工具)                 -->
+    <!-- ========================================================================= -->
+    <section id="section-tracker" class="main-section hidden max-w-5xl w-full mx-auto px-4 py-6 space-y-5">
+        <div class="bg-white rounded-3xl p-5 shadow-md border border-emerald-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="font-black text-lg text-emerald-900">🏆 實體撲克牌遊玩－數位分數紀錄表</h2>
+                <p class="text-xs text-slate-500">使用實體撲克牌遊玩時，可用此工具記錄每位隊員的安全區能量與探索成果</p>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="tracker-new-name" placeholder="輸入隊員名稱..." class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" onkeypress="if(event.key==='Enter') addTrackerPlayer()">
+                <button onclick="addTrackerPlayer()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow shrink-0">+ 新增</button>
+                <button onclick="resetTrackerPlayers()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-2 rounded-xl text-xs shrink-0">重置</button>
+            </div>
+        </div>
+
+        <div id="tracker-players-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- 由 JS 動態生成實體計分板卡片 -->
+        </div>
+    </section>
+
+    <!-- ==================== 彈窗 2：自然事件觸發提示 (J / Q / K) ==================== -->
+    <div id="event-alert-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-4 border-rose-400 text-center space-y-4">
+            <div id="event-icon" class="text-6xl">⛈️</div>
+            <div>
+                <span class="bg-rose-100 text-rose-700 font-black text-xs px-3 py-1 rounded-full">遭遇自然環境事件！</span>
+                <h3 id="event-title" class="text-2xl font-black text-slate-800 mt-2">抽到 Q 暴雨事件！</h3>
+                <p id="event-desc" class="text-sm text-slate-600 mt-2 leading-relaxed">
+                    暫存區的能量全數流失，本回合強制結束！（安全區不受影響）
+                </p>
+            </div>
+            <button onclick="acknowledgeEvent()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-3 rounded-xl shadow transition">
+                換下一位玩家 ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 彈窗 3：遊戲勝利結算畫面 ==================== -->
+    <div id="win-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-400 text-center space-y-5">
+            <div class="text-6xl animate-bounce">🏆</div>
+            <div>
+                <span class="bg-amber-100 text-amber-800 font-black text-xs px-3 py-1 rounded-full">探險任務達成！</span>
+                <h3 id="winner-title" class="text-3xl font-black text-emerald-800 mt-2">玩家 1 獲勝！</h3>
+                <p class="text-sm text-slate-500 mt-1">恭喜成為最優秀的昆蟲生態探險家！</p>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-sm">
+                <div class="flex justify-between font-bold">
+                    <span id="final-name-0">玩家 1</span>
+                    <span class="text-emerald-600 font-black"><span id="final-score-0">0</span> 分</span>
+                </div>
+                <div class="flex justify-between font-bold">
+                    <span id="final-name-1">AI 探險隊長</span>
+                    <span class="text-amber-600 font-black"><span id="final-score-1">0</span> 分</span>
+                </div>
+            </div>
+
+            <button onclick="returnToTitle()" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black py-3.5 rounded-2xl shadow-lg text-base">
+                🔄 再玩一局
+            </button>
+        </div>
+    </div>
+
+    <!-- 提示 Toast -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+        提示訊息
+    </div>
+
+    <script>
+        // ==================== 1. 核心昆蟲與題庫資料 (整合 P.4 ~ P.6 全部細節) ====================
+        const SUITS = {
+            '♥': { name: '花蜜', icon: '🌸', color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-300' },
+            '♠': { name: '森林', icon: '🌲', color: 'text-slate-800', bg: 'bg-slate-100', border: 'border-slate-300' },
+            '♦': { name: '陽光', icon: '☀️', color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-300' },
+            '♣': { name: '植物', icon: '🌿', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-300' }
+        };
+
+        const INSECTS = [
+            {
+                id: 'butterfly', name: '蝴蝶', latin: 'Lepidoptera', emoji: '🦋', score: 3,
+                habitat: '花叢與陽光草地', colorClass: 'from-pink-500 to-rose-500',
+                cost: { '♥': 2, '♦': 1 },
+                appearance: '擁有兩對佈滿細小鱗片的美麗翅膀，頭部有一對棒狀觸角，以及平時捲曲、吸食時伸長的虹吸式口器。',
+                habits: '白天活動（日行性），喜歡在陽光充足的花叢間飛舞吸食花蜜。成長過程經歷卵、幼蟲、蛹、成蟲的「完全變態」。',
+                fact: '蝴蝶的味覺受器長在「腳」上！停在花朵或葉片上用腳踩一踩就能知道味道。'
+            },
+            {
+                id: 'ladybug', name: '瓢蟲', latin: 'Coccinellidae', emoji: '🐞', score: 3,
+                habitat: '農田與灌木植物', colorClass: 'from-red-500 to-orange-500',
+                cost: { '♣': 2, '♦': 1 },
+                appearance: '身體呈半球形，背上有一對堅硬且色彩鮮豔的鞘翅，遇到危險時會裝死並分泌黃色臭液。',
+                habits: '多數肉食性瓢蟲（如七星瓢蟲）以蚜蟲為食，是農夫眼中的益蟲；少數植食性瓢蟲則吃植物葉片。',
+                fact: '瓢蟲背上的斑點數量並不能判斷年齡，而是依瓢蟲的「品種」而固定的！'
+            },
+            {
+                id: 'bee', name: '蜜蜂', latin: 'Anthophila', emoji: '🐝', score: 3,
+                habitat: '百花盛開的草地與樹林', colorClass: 'from-amber-400 to-yellow-600',
+                cost: { '♥': 2, '♣': 1 },
+                appearance: '身體分頭、胸、腹三部分，全身長滿細毛方便沾附花粉，後腳特化出「花粉籃」，腹部末端有螫針。',
+                habits: '高度社會化昆蟲，工蜂負責採集花蜜與花粉，同時幫植物完成授粉工作。',
+                fact: '偵察蜂發現蜜源後，會跳「8字舞」或「圓圈舞」通知同伴花朵的方位與距離！'
+            },
+            {
+                id: 'mantis', name: '螳螂', latin: 'Mantodea', emoji: '🦗', score: 3,
+                habitat: '陽光照射的草叢與枝葉間', colorClass: 'from-lime-500 to-green-600',
+                cost: { '♠': 1, '♦': 1 },
+                appearance: '三角形頭部可靈活轉動，前足特化成鐮刀狀的「捕捉足」，上面長滿銳利棘刺。',
+                habits: '純肉食性的伏擊獵手，常利用保護色靜止偽裝在枝葉上，等獵物靠近瞬間夾住。',
+                fact: '螳螂是少數頭部可以左右轉動高達 180 度的昆蟲，不用移動身體就能觀察四周！'
+            },
+            {
+                id: 'beetle', name: '獨角仙', latin: 'Trypoxylus dichotomus', emoji: '🪲', score: 5,
+                habitat: '闊葉林與腐植土森林', colorClass: 'from-amber-800 to-stone-900',
+                cost: { '♠': 2, '♣': 2 },
+                appearance: '體型壯碩，外骨骼堅硬呈深褐色。雄蟲頭部有巨大的分叉觭角，雌蟲則沒有角。',
+                habits: '夜行性甲蟲，晚上聚集在光臘樹上吸食樹液，雄蟲會用長角互相頂撞爭奪地盤與配偶。',
+                fact: '獨角仙幼蟲（雞母蟲）住在腐植土中分解落葉與枯木，是大自然重要的分解者！'
+            },
+            {
+                id: 'dragonfly', name: '蜻蜓', latin: 'Anisoptera', emoji: '🚁', score: 5,
+                habitat: '池塘水域與陽光花草區', colorClass: 'from-sky-500 to-teal-600',
+                cost: { '♦': 2, '♥': 2 },
+                appearance: '擁有幾乎佔滿整個頭部的巨大複眼、細長腹部，以及兩對網狀脈絡清晰的透明翅膀。',
+                habits: '成蟲在空中捕食蚊子等飛蟲；幼蟲稱為「水蠆」，生活在水中用鰓呼吸。',
+                fact: '蜻蜓是飛行高手，不僅能定點懸停、急轉彎，甚至還能「倒退飛行」！'
+            }
+        ];
+
+        // ==================== 2. 頂部主導覽切換 ====================
+        function switchMainSection(secName) {
+            document.querySelectorAll('.main-section').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`section-${secName}`);
+            target.classList.remove('hidden');
+            if (secName === 'play') target.classList.add('flex');
+
+            document.querySelectorAll('.main-nav-btn').forEach(btn => {
+                btn.classList.remove('nav-active');
+                btn.classList.add('text-emerald-100');
+            });
+            const activeBtn = document.getElementById(`nav-${secName}`);
+            activeBtn.classList.add('nav-active');
+            activeBtn.classList.remove('text-emerald-100');
+        }
+
+        // ==================== 3. 線上互動桌遊核心邏輯 ====================
+        let gameMode = 'ai';
+        let targetScore = 15;
+        let deck = [];
+        let currentTurn = 0;
+        let isProcessing = false;
+        let tempEnergy = { '♥': 0, '♠': 0, '♦': 0, '♣': 0 };
+        let tempCards = [];
+        let players = [];
+
+        function selectMode(mode) {
+            gameMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => {
+                b.className = 'mode-btn bg-white text-slate-700 border border-emerald-200 hover:bg-emerald-100 font-bold py-3 px-3 rounded-xl text-sm flex flex-col items-center';
+            });
+            document.getElementById(`mode-${mode}`).className = 'mode-btn bg-emerald-600 text-white font-bold py-3 px-3 rounded-xl shadow text-sm flex flex-col items-center';
+        }
+
+        function selectTargetScore(score) {
+            targetScore = score;
+            document.querySelectorAll('.target-btn').forEach(b => {
+                b.className = 'target-btn bg-white border border-emerald-200 text-slate-700 font-bold py-2 rounded-xl text-xs';
+            });
+            document.getElementById(`target-${score}`).className = 'target-btn bg-amber-400 text-amber-950 font-black py-2 rounded-xl text-xs shadow';
+        }
+
+        function buildAndShuffleDeck() {
+            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const suits = ['♥', '♠', '♦', '♣'];
+            let newDeck = [];
+            for (let s of suits) {
+                for (let r of ranks) newDeck.push({ suit: s, rank: r });
+            }
+            for (let i = newDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+            }
+            return newDeck;
+        }
+
+        function startGame() {
+            deck = buildAndShuffleDeck();
+            currentTurn = 0;
+            isProcessing = false;
+            tempEnergy = { '♥': 0, '♠': 0, '♦': 0, '♣': 0 };
+            tempCards = [];
+
+            players = [
+                { name: '玩家 1', isAI: false, score: 0, safe: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, bugs: [] },
+                { name: gameMode === 'ai' ? 'AI 探險隊長' : '玩家 2', isAI: gameMode === 'ai', score: 0, safe: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, bugs: [] }
+            ];
+
+            document.getElementById('name-p0').textContent = players[0].name;
+            document.getElementById('name-p1').textContent = players[1].name;
+            document.getElementById('avatar-p1').textContent = players[1].isAI ? '🤖' : '🎒';
+            document.querySelectorAll('.target-display').forEach(el => el.textContent = targetScore);
+
+            document.getElementById('screen-title').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('screen-game').classList.add('flex');
+
+            resetDrawnSlot();
+            updateGameUI();
+            showToast('遊戲開始！由玩家 1 先抽牌！');
+        }
+
+        function returnToTitle() {
+            document.getElementById('win-modal').classList.add('hidden');
+            document.getElementById('win-modal').classList.remove('flex');
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('flex');
+            document.getElementById('screen-title').classList.remove('hidden');
+        }
+
+        function handleDrawCard() {
+            if (isProcessing || players[currentTurn].isAI) return;
+            drawCardCore();
+        }
+
+        function drawCardCore() {
+            if (deck.length === 0) {
+                deck = buildAndShuffleDeck();
+                showToast('牌庫已抽完，自動重新洗勻 52 張撲克牌！');
+            }
+
+            const card = deck.pop();
+            renderDrawnCard(card);
+
+            if (['J', 'Q', 'K'].includes(card.rank)) {
+                isProcessing = true;
+                const table = document.getElementById('table-area');
+                table.classList.add('shake-event');
+                setTimeout(() => table.classList.remove('shake-event'), 500);
+
+                tempEnergy = { '♥': 0, '♠': 0, '♦': 0, '♣': 0 };
+                tempCards = [];
+                updateGameUI();
+
+                const eventInfo = {
+                    'J': { icon: '💨', title: '抽到 J【強風事件】！', desc: '一陣強風吹散了草地上的能量！暫存區能量全部失去，本回合強制結束。（安全區不受影響）' },
+                    'Q': { icon: '⛈️', title: '抽到 Q【暴雨事件】！', desc: '森林突然下起傾盆大雨！暫存區能量全數流失，本回合強制結束。（安全區不受影響）' },
+                    'K': { icon: '🍂', title: '抽到 K【棲地變化】！', desc: '自然環境發生變遷！暫存區能量無法保留，本回合強制結束。（安全區不受影響）' }
+                }[card.rank];
+
+                if (players[currentTurn].isAI) {
+                    showToast(`🤖 AI 抽到 ${card.rank} 事件牌，暫存區歸零！換你了！`);
+                    setTimeout(() => {
+                        isProcessing = false;
+                        switchTurn();
+                    }, 1400);
+                } else {
+                    document.getElementById('event-icon').textContent = eventInfo.icon;
+                    document.getElementById('event-title').textContent = eventInfo.title;
+                    document.getElementById('event-desc').textContent = eventInfo.desc;
+                    document.getElementById('event-alert-modal').classList.remove('hidden');
+                    document.getElementById('event-alert-modal').classList.add('flex');
+                }
+            } else {
+                tempEnergy[card.suit] += 1;
+                tempCards.push(card);
+                updateGameUI();
+            }
+        }
+
+        function acknowledgeEvent() {
+            document.getElementById('event-alert-modal').classList.add('hidden');
+            document.getElementById('event-alert-modal').classList.remove('flex');
+            isProcessing = false;
+            switchTurn();
+        }
+
+        function handleBankEnergy() {
+            if (isProcessing || tempCards.length === 0 || players[currentTurn].isAI) return;
+            const p = players[currentTurn];
+            for (let s of ['♥', '♠', '♦', '♣']) {
+                p.safe[s] += tempEnergy[s];
+                tempEnergy[s] = 0;
+            }
+            tempCards = [];
+            showToast(`🛡️ ${p.name} 已將能量安全帶回營地！`);
+            updateGameUI();
+
+            const canCraftAny = INSECTS.some(bug => canAffordBug(p, bug));
+            if (!canCraftAny) {
+                isProcessing = true;
+                setTimeout(() => {
+                    isProcessing = false;
+                    switchTurn();
+                }, 900);
+            } else {
+                document.getElementById('turn-status-text').textContent = '✨ 可點選下方亮起昆蟲探索，或點按鈕換下一位';
+                const bankBtn = document.getElementById('btn-bank');
+                bankBtn.disabled = false;
+                bankBtn.innerHTML = '<span>⏭️</span> <span>不探索，換下一位</span>';
+                bankBtn.onclick = () => {
+                    bankBtn.onclick = handleBankEnergy;
+                    switchTurn();
+                };
+                document.getElementById('btn-draw').disabled = true;
+                document.getElementById('deck-btn').disabled = true;
+            }
+        }
+
+        function switchTurn() {
+            const bankBtn = document.getElementById('btn-bank');
+            bankBtn.onclick = handleBankEnergy;
+            bankBtn.innerHTML = '<span>🛡️</span> <span>停止並存入安全區</span>';
+
+            currentTurn = currentTurn === 0 ? 1 : 0;
+            tempEnergy = { '♥': 0, '♠': 0, '♦': 0, '♣': 0 };
+            tempCards = [];
+            resetDrawnSlot();
+            updateGameUI();
+
+            if (players[currentTurn].isAI) {
+                runAITurn();
+            } else {
+                showToast(`輪到 ${players[currentTurn].name} 的回合！`);
+            }
+        }
+
+        function canAffordBug(player, bug) {
+            for (let [suit, req] of Object.entries(bug.cost)) {
+                if ((player.safe[suit] || 0) < req) return false;
+            }
+            return true;
+        }
+
+        function handleExploreBug(bugId) {
+            if (isProcessing || players[currentTurn].isAI) return;
+            const p = players[currentTurn];
+            const bug = INSECTS.find(b => b.id === bugId);
+            if (!bug || !canAffordBug(p, bug)) return;
+
+            for (let [suit, req] of Object.entries(bug.cost)) p.safe[suit] -= req;
+            for (let s of ['♥', '♠', '♦', '♣']) {
+                p.safe[s] += tempEnergy[s];
+                tempEnergy[s] = 0;
+            }
+            tempCards = [];
+
+            p.score += bug.score;
+            p.bugs.push(bug);
+            updateGameUI();
+            showToast(`🎉 ${p.name} 完成了【${bug.name}】探索，獲得 +${bug.score} 分！`);
+
+            isProcessing = true;
+            setTimeout(() => {
+                isProcessing = false;
+                if (!checkWinCondition()) switchTurn();
+            }, 900);
+        }
+
+        function runAITurn() {
+            isProcessing = true;
+            updateGameUI();
+            let drawsCount = 0;
+            const maxDraws = Math.floor(Math.random() * 2) + 2;
+
+            function aiStep() {
+                if (currentTurn !== 1 || !players[1].isAI) return;
+                if (drawsCount < maxDraws) {
+                    drawsCount++;
+                    drawCardCore();
+                    if (tempCards.length === 0) return;
+                    setTimeout(aiStep, 1100);
+                } else {
+                    const p = players[1];
+                    for (let s of ['♥', '♠', '♦', '♣']) {
+                        p.safe[s] += tempEnergy[s];
+                        tempEnergy[s] = 0;
+                    }
+                    tempCards = [];
+                    updateGameUI();
+                    showToast('🤖 AI 探險隊長停止抽牌，將能量存入安全區！');
+
+                    setTimeout(() => {
+                        const affordable = [...INSECTS].reverse().find(bug => canAffordBug(p, bug));
+                        if (affordable) {
+                            for (let [suit, req] of Object.entries(affordable.cost)) p.safe[suit] -= req;
+                            p.score += affordable.score;
+                            p.bugs.push(affordable);
+                            updateGameUI();
+                            showToast(`🤖 AI 完成了【${affordable.name}】探索 (+${affordable.score}分)！`);
+                        }
+                        setTimeout(() => {
+                            isProcessing = false;
+                            if (!checkWinCondition()) switchTurn();
+                        }, 1100);
+                    }, 900);
+                }
+            }
+            setTimeout(aiStep, 900);
+        }
+
+        function checkWinCondition() {
+            const winner = players.find(p => p.score >= targetScore);
+            if (winner) {
+                document.getElementById('winner-title').textContent = `🎉 ${winner.name} 獲勝！`;
+                document.getElementById('final-name-0').textContent = players[0].name;
+                document.getElementById('final-score-0').textContent = players[0].score;
+                document.getElementById('final-name-1').textContent = players[1].name;
+                document.getElementById('final-score-1').textContent = players[1].score;
+                document.getElementById('win-modal').classList.remove('hidden');
+                document.getElementById('win-modal').classList.add('flex');
+                return true;
+            }
+            return false;
+        }
+
+        function renderDrawnCard(card) {
+            const slot = document.getElementById('drawn-card-slot');
+            const sInfo = SUITS[card.suit];
+            const isEvent = ['J', 'Q', 'K'].includes(card.rank);
+            const eventNames = { 'J': '💨 強風事件', 'Q': '⛈️ 暴雨事件', 'K': '🍂 棲地變化' };
+
+            slot.className = `w-28 h-40 sm:w-32 sm:h-44 rounded-2xl border-2 ${isEvent ? 'border-rose-400 bg-rose-50' : sInfo.border + ' bg-white'} shadow-lg flex flex-col justify-between p-2.5 card-pop`;
+            slot.innerHTML = `
+                <div class="flex justify-between items-start leading-none">
+                    <span class="font-display font-black text-2xl ${isEvent ? 'text-rose-600' : sInfo.color}">${card.rank}</span>
+                    <span class="text-xl ${sInfo.color}">${card.suit}</span>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl">${isEvent ? (card.rank === 'J' ? '💨' : card.rank === 'Q' ? '⛈️' : '🍂') : sInfo.icon}</div>
+                    <div class="mt-1 text-[11px] font-black px-2 py-0.5 rounded-full ${isEvent ? 'bg-rose-600 text-white' : sInfo.bg + ' ' + sInfo.color}">
+                        ${isEvent ? eventNames[card.rank] : sInfo.name + '能量'}
+                    </div>
+                </div>
+                <div class="flex justify-between items-end leading-none transform rotate-180">
+                    <span class="font-display font-black text-2xl ${isEvent ? 'text-rose-600' : sInfo.color}">${card.rank}</span>
+                    <span class="text-xl ${sInfo.color}">${card.suit}</span>
+                </div>
+            `;
+        }
+
+        function resetDrawnSlot() {
+            const slot = document.getElementById('drawn-card-slot');
+            slot.className = 'w-28 h-40 sm:w-32 sm:h-44 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center p-2 text-center';
+            slot.innerHTML = `<span class="text-3xl opacity-30">🃏</span><span class="text-[11px] font-bold text-slate-400 mt-1">翻開的牌<br>顯示於此</span>`;
+        }
+
+        function updateGameUI() {
+            document.getElementById('deck-count').textContent = deck.length;
+
+            players.forEach((p, idx) => {
+                document.getElementById(`score-p${idx}`).textContent = p.score;
+                const panel = document.getElementById(`panel-p${idx}`);
+                const badge = document.getElementById(`turn-badge-p${idx}`);
+
+                if (currentTurn === idx) {
+                    panel.classList.add(idx === 0 ? 'border-emerald-500' : 'border-amber-500', 'bg-white');
+                    panel.classList.remove('border-transparent', 'bg-white/90');
+                    badge.classList.remove('hidden');
+                } else {
+                    panel.classList.remove('border-emerald-500', 'border-amber-500', 'bg-white');
+                    panel.classList.add('border-transparent', 'bg-white/90');
+                    badge.classList.add('hidden');
+                }
+
+                document.getElementById(`safe-p${idx}`).innerHTML = ['♥', '♠', '♦', '♣'].map(s => `
+                    <span class="${SUITS[s].color} bg-white px-2 py-0.5 rounded-lg border border-slate-200">${s}${p.safe[s]}</span>
+                `).join('');
+
+                document.getElementById(`bugs-p${idx}`).innerHTML = p.bugs.length > 0
+                    ? p.bugs.map(b => `<span class="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-full">${b.emoji}${b.name}</span>`).join('')
+                    : '尚未發現昆蟲';
+            });
+
+            for (let s of ['♥', '♠', '♦', '♣']) document.getElementById(`temp-${s}`).textContent = tempEnergy[s];
+
+            document.getElementById('temp-cards-list').innerHTML = tempCards.length > 0
+                ? tempCards.map(c => `<span class="bg-white border ${SUITS[c.suit].border} ${SUITS[c.suit].color} font-black px-2 py-0.5 rounded-md">${c.suit}${c.rank}</span>`).join('')
+                : '尚未抽取能量牌...';
+
+            const isHumanTurn = !players[currentTurn].isAI && !isProcessing;
+            document.getElementById('btn-draw').disabled = !isHumanTurn;
+            document.getElementById('deck-btn').disabled = !isHumanTurn;
+            document.getElementById('btn-bank').disabled = !isHumanTurn || tempCards.length === 0;
+
+            if (players[currentTurn].isAI) document.getElementById('turn-status-text').textContent = '🤖 AI 正在決定是否繼續抽牌...';
+            else if (tempCards.length === 0) document.getElementById('turn-status-text').textContent = '請點擊「抽牌」收集能量';
+            else document.getElementById('turn-status-text').textContent = `已累積 ${tempCards.length} 張能量，要繼續冒險還是存入安全區？`;
+
+            const market = document.getElementById('bugs-market');
+            market.innerHTML = '';
+            const activePlayer = players[currentTurn];
+
+            INSECTS.forEach(bug => {
+                const affordable = !activePlayer.isAI && canAffordBug(activePlayer, bug);
+                const costHtml = Object.entries(bug.cost).map(([s, count]) => `
+                    <span class="${SUITS[s].color} font-black text-xs bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">${count}${s}</span>
+                `).join(' ');
+
+                const card = document.createElement('button');
+                card.disabled = !affordable;
+                card.onclick = () => handleExploreBug(bug.id);
+                card.className = `rounded-2xl p-3 border-2 text-left transition flex flex-col justify-between ${
+                    affordable 
+                        ? 'bg-emerald-50/70 border-emerald-500 shadow-md hover:-translate-y-1 cursor-pointer ring-2 ring-emerald-300' 
+                        : 'bg-slate-50 border-slate-200 opacity-85 cursor-not-allowed'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between w-full mb-1.5">
+                        <span class="text-3xl">${bug.emoji}</span>
+                        <span class="bg-amber-400 text-amber-950 font-black text-xs px-2 py-0.5 rounded-full">${bug.score} 分</span>
+                    </div>
+                    <div class="font-black text-sm text-slate-800">${bug.name}</div>
+                    <div class="mt-1.5 flex flex-wrap gap-1">${costHtml}</div>
+                    <div class="mt-2 text-[11px] font-black text-center py-1 rounded-lg ${affordable ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'}">
+                        ${affordable ? '✨ 點擊完成探索！' : '能量不足'}
+                    </div>
+                `;
+                market.appendChild(card);
+            });
+        }
+
+        // ==================== 4. 昆蟲圖鑑分頁渲染 ====================
+        function renderDexGrid(filterScore = 'all') {
+            const grid = document.getElementById('dex-grid');
+            grid.innerHTML = '';
+            const list = filterScore === 'all' ? INSECTS : INSECTS.filter(b => b.score === filterScore);
+
+            list.forEach(bug => {
+                const costBadges = Object.entries(bug.cost).map(([s, count]) => `
+                    <span class="px-2.5 py-1 rounded-xl border text-xs font-black ${SUITS[s].bg} ${SUITS[s].border} ${SUITS[s].color}">
+                        ${count}${s} ${SUITS[s].name}
+                    </span>
+                `).join('');
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-3xl overflow-hidden shadow-md border border-emerald-100 flex flex-col';
+                card.innerHTML = `
+                    <div class="bg-gradient-to-r ${bug.colorClass} p-4 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center">${bug.emoji}</span>
+                            <div>
+                                <h3 class="text-xl font-black">${bug.name}</h3>
+                                <div class="text-xs text-white/85">${bug.habitat}</div>
+                            </div>
+                        </div>
+                        <span class="bg-amber-400 text-amber-950 font-black px-3 py-1 rounded-full text-sm shadow">基本分 ${bug.score} 分</span>
+                    </div>
+                    <div class="p-5 space-y-3 text-xs sm:text-sm flex-1">
+                        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+                            <span class="font-bold text-slate-600">所需安全區能量：</span>
+                            <div class="flex gap-1.5">${costBadges}</div>
+                        </div>
+                        <div><strong class="text-emerald-900">外型特徵：</strong><span class="text-slate-600">${bug.appearance}</span></div>
+                        <div><strong class="text-emerald-900">生活習性：</strong><span class="text-slate-600">${bug.habits}</span></div>
+                        <div class="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-950 text-xs">
+                            <strong>💡 生態小知識：</strong>${bug.fact}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterDex(score, btn) {
+            document.querySelectorAll('.dex-filter-btn').forEach(b => {
+                b.classList.remove('bg-emerald-600', 'text-white');
+                b.classList.add('bg-emerald-100', 'text-emerald-800');
+            });
+            btn.classList.remove('bg-emerald-100', 'text-emerald-800');
+            btn.classList.add('bg-emerald-600', 'text-white');
+            renderDexGrid(score);
+        }
+
+        // ==================== 6. 實體桌遊計分板分頁 ====================
+        let trackerPlayers = JSON.parse(localStorage.getItem('bugQuest_tracker')) || [
+            { id: 1, name: '探險隊員 1', score: 0, safe: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, bugs: [] },
+            { id: 2, name: '探險隊員 2', score: 0, safe: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, bugs: [] }
+        ];
+
+        function saveTracker() {
+            localStorage.setItem('bugQuest_tracker', JSON.stringify(trackerPlayers));
+        }
+
+        function renderTracker() {
+            const grid = document.getElementById('tracker-players-grid');
+            grid.innerHTML = '';
+            trackerPlayers.forEach((p, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-3xl p-5 shadow-md border border-emerald-100 space-y-4';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center">${idx + 1}</span>
+                            <h3 class="font-black text-lg text-slate-800">${p.name}</h3>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl font-display font-black text-emerald-700">${p.score} <span class="text-xs font-sans text-slate-400">分</span></span>
+                            ${trackerPlayers.length > 1 ? `<button onclick="deleteTrackerPlayer(${p.id})" class="text-slate-300 hover:text-rose-500">✕</button>` : ''}
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 grid grid-cols-4 gap-2 text-center">
+                        ${['♥', '♠', '♦', '♣'].map(s => `
+                            <div class="bg-white rounded-xl p-1.5 border border-slate-200">
+                                <div class="text-xs font-bold ${SUITS[s].color}">${s} ${SUITS[s].name}</div>
+                                <div class="font-black text-base my-0.5">${p.safe[s] || 0}</div>
+                                <div class="flex justify-center gap-1">
+                                    <button onclick="modTrackerEnergy(${p.id}, '${s}', -1)" class="w-6 h-6 bg-slate-100 rounded-lg font-bold text-xs">-</button>
+                                    <button onclick="modTrackerEnergy(${p.id}, '${s}', 1)" class="w-6 h-6 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-xs">+</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${INSECTS.map(b => `
+                            <button onclick="addTrackerBug(${p.id}, '${b.id}')" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-xs font-bold px-2.5 py-1.5 rounded-xl">
+                                ${b.emoji}${b.name} +${b.score}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="text-xs text-slate-500 flex flex-wrap gap-1">
+                        ${p.bugs.length > 0 ? p.bugs.map(b => `<span class="bg-slate-100 px-2 py-0.5 rounded-full font-bold">${b}</span>`).join('') : '尚未紀錄完成昆蟲'}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function modTrackerEnergy(id, suit, delta) {
+            const p = trackerPlayers.find(x => x.id === id);
+            if (!p) return;
+            p.safe[suit] = Math.max(0, (p.safe[suit] || 0) + delta);
+            saveTracker();
+            renderTracker();
+        }
+
+        function addTrackerBug(id, bugId) {
+            const p = trackerPlayers.find(x => x.id === id);
+            const b = INSECTS.find(x => x.id === bugId);
+            if (!p || !b) return;
+            p.score += b.score;
+            p.bugs.push(`${b.emoji}${b.name}(+${b.score})`);
+            saveTracker();
+            renderTracker();
+            showToast(`${p.name} 紀錄完成【${b.name}】+${b.score} 分！`);
+        }
+
+        function addTrackerPlayer() {
+            const input = document.getElementById('tracker-new-name');
+            const name = input.value.trim();
+            if (!name) return;
+            trackerPlayers.push({ id: Date.now(), name, score: 0, safe: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, bugs: [] });
+            input.value = '';
+            saveTracker();
+            renderTracker();
+        }
+
+        function deleteTrackerPlayer(id) {
+            trackerPlayers = trackerPlayers.filter(x => x.id !== id);
+            saveTracker();
+            renderTracker();
+        }
+
+        function resetTrackerPlayers() {
+            trackerPlayers = trackerPlayers.map(p => ({ ...p, score: 0, safe: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, bugs: [] }));
+            saveTracker();
+            renderTracker();
+            showToast('實體計分板已全部歸零！');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('opacity-0');
+            clearTimeout(window.tTimer);
+            window.tTimer = setTimeout(() => t.classList.add('opacity-0'), 2800);
+        }
+
+        // 初始化各分頁資料
+        window.onload = function() {
+            renderDexGrid();
+            renderTracker();
+        };
+    </script>
+</body>
+</html>
